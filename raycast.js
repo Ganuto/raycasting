@@ -33,21 +33,90 @@ class Map {
             }
         }
     }
+    hasWallAt(x, y){
+        if(x < 0 || x > WINDOW_WIDTH || y < 0 || y > WINDOW_HEIGHT){
+            return true;
+        }
+        var mapGridIndeX = Math.floor(x / TILE_SIZE);
+        var mapGridIndeY = Math.floor(y / TILE_SIZE);
+        return this.grid[mapGridIndeY][mapGridIndeX] != 0;
+    }
+}
+
+class Player{
+    constructor(){
+        this.x = WINDOW_WIDTH / 2;
+        this.y = WINDOW_HEIGHT / 2; 
+        this.radius = 3;
+        this.turnDirection = 0;
+        this.walkDirection = 0;
+        this.rotationAngle = Math.PI / 2;
+        this.moveSpeed = 2.0;
+        this.turnSpeed = 2 * (Math.PI / 180);
+    } 
+    update(){
+        this.rotationAngle += this.turnDirection * this.turnSpeed;
+        var moveStep = this.walkDirection * this.moveSpeed;
+        this.newPlayerY = this.y + Math.sin(this.rotationAngle) * moveStep;
+        this.newPlayerX = this.x + Math.cos(this.rotationAngle) * moveStep;
+        if(!grid.hasWallAt(this.newPlayerX, this.newPlayerY)){
+            this.y = this.newPlayerY;
+            this.x = this.newPlayerX;
+        }
+    }
+    render(){
+        noStroke();
+        fill("red");
+        circle(this.x, this.y, this.radius);
+        stroke("red");
+        line(this.x, this.y, this.x + Math.cos(this.rotationAngle) * 30, this.y + Math.sin(this.rotationAngle) * 30);
+    }
 }
 
 var grid = new Map();
+var player = new Player();
+
+function keyPressed(){
+    if(keyCode == UP_ARROW){
+        player.walkDirection = +1;
+    }
+    if(keyCode == DOWN_ARROW){
+        player.walkDirection = -1;
+    }
+    if(keyCode == RIGHT_ARROW){
+        player.turnDirection = +1;
+    }
+    if(keyCode == LEFT_ARROW){
+        player.turnDirection = -1;
+    }
+}
+
+function keyReleased(){
+    if(keyCode == UP_ARROW){
+        player.walkDirection = 0;
+    }
+    if(keyCode == DOWN_ARROW){
+        player.walkDirection = 0;
+    }
+    if(keyCode == RIGHT_ARROW){
+        player.turnDirection = 0;
+    }
+    if(keyCode == LEFT_ARROW){
+        player.turnDirection = 0;
+    }
+}
 
 function setup() {
     createCanvas(WINDOW_WIDTH, WINDOW_HEIGHT);
-
 }
 
 function update() {
-    // TODO: update all game objects before we render the next frame
+    player.update();
 }
 
 function draw() {
     update();
 
     grid.render();
+    player.render();
 }
